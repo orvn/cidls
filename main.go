@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	cid "github.com/ipfs/go-cid"
 	multihash "github.com/multiformats/go-multihash"
@@ -23,20 +24,40 @@ func main() {
 		return
 	}
 
-	// Print files and their CIDs
+	// Channel to collect file names and their CIDs
+	results := make(chan string, len(files))
+
+	// Use a WaitGroup to wait for all goroutines
+	var wg sync.WaitGroup
+
+	// Start a goroutine for each file
 	for _, file := range files {
-		fmt.Printf("%s\t", file.Name())
-		if !file.IsDir() { // Only process files, not directories
-			cidStr, err := computeCID(file.Name())
-			if err != nil {
-				fmt.Printf("ERROR: %s\n", err)
+		wg.Add(1)
+		go func(file os.DirEntry) {
+			defer wg.Done()
+
+			if !file.IsDir() {
+				cidStr, err := computeCID(file.Name())
+				if err != nil {
+					results <- fmt.Sprintf("%s\tERROR: %s", file.Name(), err)
+				} else {
+					results <- fmt.Sprintf("%s\t%s", file.Name(), cidStr)
+				}
 			} else {
-				fmt.Printf("%s\n", cidStr)
+				results <- fmt.Sprintf("%s\t", file.Name())
 			}
-		} else {
-			// For directories, just print the name without a CID
-			fmt.Println()
-		}
+		}(file)
+	}
+
+	// Close the results channel after all goroutines are done
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	// Print results as they come in
+	for result := range results {
+		fmt.Println(result)
 	}
 }
 
