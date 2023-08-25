@@ -24,6 +24,14 @@ func main() {
 		return
 	}
 
+	// Compute the maximum filename length
+	maxNameLen := 0
+	for _, file := range files {
+		if len(file.Name()) > maxNameLen {
+			maxNameLen = len(file.Name())
+		}
+	}
+
 	// Channel to collect file names and their CIDs
 	results := make(chan string, len(files))
 
@@ -36,15 +44,16 @@ func main() {
 		go func(file os.DirEntry) {
 			defer wg.Done()
 
+			formattedName := fmt.Sprintf("%-*s", maxNameLen, file.Name())
 			if !file.IsDir() {
 				cidStr, err := computeCID(file.Name())
 				if err != nil {
-					results <- fmt.Sprintf("%s\tERROR: %s", file.Name(), err)
+					results <- fmt.Sprintf("%s\tERROR: %s", formattedName, err)
 				} else {
-					results <- fmt.Sprintf("%s\t%s", file.Name(), cidStr)
+					results <- fmt.Sprintf("%s\t%s", formattedName, cidStr)
 				}
 			} else {
-				results <- fmt.Sprintf("%s\t", file.Name())
+				results <- fmt.Sprintf("%s\t", formattedName)
 			}
 		}(file)
 	}
