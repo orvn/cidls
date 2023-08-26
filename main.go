@@ -10,17 +10,32 @@ import (
 )
 
 func main() {
-	// Get current working directory
-	dir, err := os.Getwd()
-	if err != nil {
-		fmt.Println("Error getting current directory:", err)
+	// Get directory from $1 argument or use the current directory
+	var dir string
+	if len(os.Args) > 1 {
+		dir = os.Args[1]
+	} else {
+		var err error
+		dir, err = os.Getwd()
+		if err != nil {
+			fmt.Println("Error getting current directory:", err)
+			return
+		}
+	}
+
+	// Check if directory exists and if it's readable
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		fmt.Printf("Error: Directory %s does not exist.\n", dir)
+		return
+	} else if os.IsPermission(err) {
+		fmt.Printf("Error: Permission denied for directory %s, try using sudo?\n", dir)
 		return
 	}
 
 	// Read directory contents
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		fmt.Println("Error reading directory:", err)
+		fmt.Println("Error reading directory:\n", err)
 		return
 	}
 
@@ -46,7 +61,7 @@ func main() {
 
 			formattedName := fmt.Sprintf("%-*s", maxNameLen, file.Name())
 			if !file.IsDir() {
-				cidStr, err := computeCID(file.Name())
+				cidStr, err := computeCID(dir + string(os.PathSeparator) + file.Name()) // Use the full path
 				if err != nil {
 					results <- fmt.Sprintf("%s\tERROR: %s", formattedName, err)
 				} else {
