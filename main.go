@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
 	"sync"
 
 	cid "github.com/ipfs/go-cid"
@@ -39,29 +40,46 @@ func main() {
 		return
 	}
 
+	// Separate directories and files
+	var dirs, regularFiles []os.DirEntry
+	for _, file := range files {
+		if file.IsDir() {
+			dirs = append(dirs, file)
+		} else {
+			regularFiles = append(regularFiles, file)
+		}
+	}
+
+	// Sort directories and files
+	sort.Slice(dirs, func(i, j int) bool { return dirs[i].Name() < dirs[j].Name() })
+	sort.Slice(regularFiles, func(i, j int) bool { return regularFiles[i].Name() < regularFiles[j].Name() })
+
+	// Merge directories and files
+	sortedFiles := append(dirs, regularFiles...)
+
 	// Compute the maximum filename length
 	maxNameLen := 0
-	for _, file := range files {
+	for _, file := range sortedFiles {
 		if len(file.Name()) > maxNameLen {
 			maxNameLen = len(file.Name())
 		}
 	}
 
 	// Channel to collect file names and their CIDs
-	results := make(chan string, len(files))
+	results := make(chan string, len(sortedFiles))
 
 	// Use a WaitGroup to wait for all goroutines
 	var wg sync.WaitGroup
 
 	// Start a goroutine for each file
-	for _, file := range files {
+	for _, file := range sortedFiles {
 		wg.Add(1)
 		go func(file os.DirEntry) {
 			defer wg.Done()
 
 			formattedName := fmt.Sprintf("%-*s", maxNameLen, file.Name())
 			if !file.IsDir() {
-				cidStr, err := computeCID(dir + string(os.PathSeparator) + file.Name()) // Use the full path
+				cidStr, err := computeCID(dir + string(os.PathSeparator) + file.Name())
 				if err != nil {
 					results <- fmt.Sprintf("%s\tERROR: %s", formattedName, err)
 				} else {
