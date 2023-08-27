@@ -14,6 +14,7 @@ type LsColors struct {
 	DirColor        string
 	SymlinkColor    string
 	ExecutableColor string
+	DotFileColor    string
 }
 
 // Default color formatting if no ls_colors variable set in .bashrc or .zshrc
@@ -22,6 +23,7 @@ func getLsColors() LsColors {
 		DirColor:        "\033[34m",
 		SymlinkColor:    "\033[36m",
 		ExecutableColor: "\033[31m",
+		DotFileColor:    "\033[37m",
 	}
 
 	lsColorsEnv := os.Getenv("LS_COLORS")
@@ -144,6 +146,12 @@ func main() {
 			defer wg.Done()
 
 			formattedName := fmt.Sprintf("%-*s", maxNameLen, file.Name())
+
+			if file.Name()[0] == '.' {
+				results <- fmt.Sprintf("%s%s%s\t", colors.DotFileColor, formattedName, resetColor)
+				return
+			}
+
 			if file.IsDir() {
 				results <- fmt.Sprintf("%s%s%s\t", colors.DirColor, formattedName, resetColor)
 			} else if (file.Type() & os.ModeSymlink) == os.ModeSymlink {
