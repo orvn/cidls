@@ -109,6 +109,17 @@ func main() {
 	// Merge directories and files
 	sortedFiles := append(dirs, regularFiles...)
 
+	// Sort the merged list to ensure directories are always at the top
+	sort.Slice(sortedFiles, func(i, j int) bool {
+		if sortedFiles[i].IsDir() && !sortedFiles[j].IsDir() {
+			return true
+		}
+		if !sortedFiles[i].IsDir() && sortedFiles[j].IsDir() {
+			return false
+		}
+		return sortedFiles[i].Name() < sortedFiles[j].Name()
+	})
+
 	// Compute the maximum filename length
 	maxNameLen := 0
 	for _, file := range sortedFiles {
