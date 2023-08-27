@@ -8,7 +8,7 @@ A cli command similar to `ls`, except with CIDs computed for each file name alon
 
 1. Clone this this repo
 2. Compile from source with `go build`
-3. Try it out by running `./cidls`
+3. Try it out by running `./cidls` for the current directory or `./cidls ~/some/path` to target any directory
 
 
 #### todo
@@ -17,5 +17,5 @@ A cli command similar to `ls`, except with CIDs computed for each file name alon
 - Add to path to run as cli command
 - Support different types of CIDs
 - Create a caching system to avoid re-processing files too much
-- Add color formatting based on `lscolor` variable
+- Make compatible with BSD-style `LSCOLORS` variable (e.g., `exgxcxdxbxegedabagacad`)
 - Add options for a few common ls flags

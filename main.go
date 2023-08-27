@@ -16,6 +16,7 @@ type LsColors struct {
 	ExecutableColor string
 }
 
+// Default color formatting if no ls_colors variable set in .bashrc or .zshrc
 func getLsColors() LsColors {
 	defaultColors := LsColors{
 		DirColor:        "\033[34m",
