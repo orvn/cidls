@@ -10,6 +10,58 @@ import (
 	multihash "github.com/multiformats/go-multihash"
 )
 
+type LsColors struct {
+	DirColor        string
+	SymlinkColor    string
+	ExecutableColor string
+}
+
+func getLsColors() LsColors {
+	defaultColors := LsColors{
+		DirColor:        "\033[34m",
+		SymlinkColor:    "\033[36m",
+		ExecutableColor: "\033[31m",
+	}
+
+	lsColorsEnv := os.Getenv("LS_COLORS")
+	if lsColorsEnv == "" {
+		return defaultColors
+	}
+
+	colors := defaultColors
+	for _, colorSetting := range split(lsColorsEnv, ":") {
+		parts := split(colorSetting, "=")
+		if len(parts) != 2 {
+			continue
+		}
+
+		colorCode := "\033[" + parts[1] + "m"
+		switch parts[0] {
+		case "di":
+			colors.DirColor = colorCode
+		case "ln":
+			colors.SymlinkColor = colorCode
+		case "ex":
+			colors.ExecutableColor = colorCode
+		}
+	}
+
+	return colors
+}
+
+func split(s, sep string) []string {
+	var parts []string
+	start := 0
+	for i := 0; i < len(s); i++ {
+		if s[i:i+1] == sep {
+			parts = append(parts, s[start:i])
+			start = i + 1
+		}
+	}
+	parts = append(parts, s[start:])
+	return parts
+}
+
 func main() {
 	// Get directory from $1 argument or use the current directory
 	var dir string
@@ -70,6 +122,8 @@ func main() {
 
 	// Use a WaitGroup to wait for all goroutines
 	var wg sync.WaitGroup
+	colors := getLsColors()
+	resetColor := "\033[0m"
 
 	// Start a goroutine for each file
 	for _, file := range sortedFiles {
@@ -78,15 +132,19 @@ func main() {
 			defer wg.Done()
 
 			formattedName := fmt.Sprintf("%-*s", maxNameLen, file.Name())
-			if !file.IsDir() {
+			if file.IsDir() {
+				results <- fmt.Sprintf("%s%s%s\t", colors.DirColor, formattedName, resetColor)
+			} else if (file.Type() & os.ModeSymlink) == os.ModeSymlink {
+				results <- fmt.Sprintf("%s%s%s\t", colors.SymlinkColor, formattedName, resetColor)
+			} else if (file.Type() & os.ModePerm) == 0111 {
+				results <- fmt.Sprintf("%s%s%s\t", colors.ExecutableColor, formattedName, resetColor)
+			} else {
 				cidStr, err := computeCID(dir + string(os.PathSeparator) + file.Name())
 				if err != nil {
 					results <- fmt.Sprintf("%s\tERROR: %s", formattedName, err)
 				} else {
 					results <- fmt.Sprintf("%s\t%s", formattedName, cidStr)
 				}
-			} else {
-				results <- fmt.Sprintf("%s\t", formattedName)
 			}
 		}(file)
 	}
