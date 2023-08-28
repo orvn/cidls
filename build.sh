@@ -10,16 +10,16 @@ VERSION=$1
 BUILD=$(date +"%Y%m%d%H%M")
 
 # Setup the -ldflags option for go build, adding the version and build number
-LDFLAGS="-ldflags \"-X main.Version=${VERSION} -X main.Build=${BUILD}\""
+LDFLAGS="-X main.Version=${VERSION} -X main.Build=${BUILD}"
 
 [ ! -d "build" ] && mkdir -p build
 
 # Build for Darwin (MacOS) on both amd64 and arm64 architectures
-GOOS=darwin GOARCH=amd64 go build $LDFLAGS -o build/${APP}_darwin_amd64
-GOOS=darwin GOARCH=arm64 go build $LDFLAGS -o build/${APP}_darwin_arm64
+GOOS=darwin GOARCH=amd64 go build -ldflags "$LDFLAGS" -o build/${APP}_darwin_amd64
+GOOS=darwin GOARCH=arm64 go build -ldflags "$LDFLAGS" -o build/${APP}_darwin_arm64
 
 # Build for Linux on both amd64 and arm64 architectures
-GOOS=linux GOARCH=amd64 go build $LDFLAGS -o build/${APP}_linux_amd64
-GOOS=linux GOARCH=arm64 go build $LDFLAGS -o build/${APP}_linux_arm64
+GOOS=linux GOARCH=amd64 go build -ldflags "$LDFLAGS" -o build/${APP}_linux_amd64
+GOOS=linux GOARCH=arm64 go build -ldflags "$LDFLAGS" -o build/${APP}_linux_arm64
 
 echo "Build complete"

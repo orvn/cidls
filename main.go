@@ -10,6 +10,11 @@ import (
 	multihash "github.com/multiformats/go-multihash"
 )
 
+var (
+	Version string
+	Build   string
+)
+
 type LsColors struct {
 	DirColor        string
 	SymlinkColor    string
@@ -66,6 +71,9 @@ func split(s, sep string) []string {
 }
 
 func main() {
+	// Print version and build number
+	fmt.Printf("Version: %s, Build: %s\n", Version, Build)
+
 	// Get directory from $1 argument or use the current directory
 	var dir string
 	if len(os.Args) > 1 {
