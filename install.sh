@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Check if the script is running as root, if not then prompt the user to run with sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run this script with sudo for necessary permissions"
+  exit 1
+fi
+
 # Config
 USERNAME="orvn"
 REPO_NAME="cidls"

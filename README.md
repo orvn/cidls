@@ -10,7 +10,7 @@ A cli command similar to `ls`, except with CIDs computed for each file name alon
 
 Quickly install this cli command by running
 ```bash
-curl -fsSL https://raw.githubusercontent.com/orvn/cidls/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/orvn/cidls/main/install.sh | sudo bash
 ```
 
 That's it! OS detection is automatic and the binary will be moved to an executable path. You'll likely be prompted for a password.
