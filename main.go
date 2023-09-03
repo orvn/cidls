@@ -21,6 +21,7 @@ type LsColors struct {
 	SymlinkColor    string
 	ExecutableColor string
 	DotFileColor    string
+	CIDColor        string
 }
 
 // Default color formatting if no ls_colors variable set in .bashrc or .zshrc
@@ -30,6 +31,7 @@ func getLsColors() LsColors {
 		SymlinkColor:    "\033[36m",
 		ExecutableColor: "\033[31m",
 		DotFileColor:    "\033[37m",
+		CIDColor:        "\033[35m",
 	}
 
 	lsColorsEnv := os.Getenv("LS_COLORS")
@@ -52,6 +54,8 @@ func getLsColors() LsColors {
 			colors.SymlinkColor = colorCode
 		case "ex":
 			colors.ExecutableColor = colorCode
+		case "cid":
+			colors.CIDColor = colorCode
 		}
 	}
 
@@ -192,7 +196,7 @@ func main() {
 				if err != nil {
 					results <- fmt.Sprintf("%s\tERROR: %s", formattedName, err)
 				} else {
-					results <- fmt.Sprintf("%s\t%s", formattedName, cidStr)
+					results <- fmt.Sprintf("%s\t%s%s%s", formattedName, colors.CIDColor, cidStr, resetColor)
 				}
 			}
 		}(file)
