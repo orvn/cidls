@@ -11,6 +11,7 @@ BASE_URL="https://github.com/${USERNAME}/${REPO_NAME}/releases/download/${VERSIO
 OS="$(uname)"
 ARCH="$(uname -m)"
 
+# Determine appropriate architecture and OS based on local system
 if [ "$OS" == "Darwin" ]; then
     if [ "$ARCH" == "x86_64" ]; then
         BINARY_URL="${BASE_URL}/${APP}_darwin_amd64"
@@ -37,3 +38,5 @@ fi
 curl -L $BINARY_URL -o /tmp/$APP
 chmod +x /tmp/$APP
 sudo mv /tmp/$APP /usr/local/bin/$APP
+
+echo "All set! Installed at /usr/local/bin/$APP"

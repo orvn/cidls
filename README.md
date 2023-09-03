@@ -6,6 +6,20 @@ A cli command similar to `ls`, except with CIDs computed for each file name alon
 
 ## Usage
 
+### Quick install
+
+Quickly install this cli command by running
+```bash
+curl -fsSL https://raw.githubusercontent.com/orvn/cidls/main/install.sh | bash
+```
+
+That's it! OS detection is automatic and the binary will be moved to an executable path. You'll likely be prompted for a password.
+
+Run the command like `cidls ~/some/path`
+
+
+### Build from source
+
 1. Clone this this repo
 2. Compile from source with `go build`
 3. Try it out by running `./cidls` for the current directory or `./cidls ~/some/path` to target any directory
