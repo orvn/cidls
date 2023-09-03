@@ -17,6 +17,11 @@ That's it! OS detection is automatic and the binary will be moved to an executab
 
 Run the command like `cidls ~/some/path`
 
+### Flags
+
+- `cidls -v` for version information
+- `cidls -h` for help
+
 
 ### Build from source
 

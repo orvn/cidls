@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"sort"
@@ -72,7 +73,27 @@ func split(s, sep string) []string {
 
 func main() {
 	// Print version and build number
-	fmt.Printf("Version: %s, Build: %s\n", Version, Build)
+	// fmt.Printf("Version: %s, Build: %s\n", Version, Build)
+
+	// CLI flags
+	helpFlag := flag.Bool("h", false, "Display help information")
+	versionFlag := flag.Bool("v", false, "Display version information")
+
+	flag.Parse()
+
+	if *helpFlag {
+		fmt.Println("Usage: cidls [OPTIONS] [DIRECTORY]")
+		fmt.Println("List information about the files in the DIRECTORY (the current directory is the default).")
+		fmt.Println("\nOptions:")
+		fmt.Println("  -h\tDisplay this help message")
+		fmt.Println("  -v\tDisplay version information")
+		return
+	}
+
+	if *versionFlag {
+		fmt.Printf("Version: %s, Build: %s\n\n", Version, Build)
+		return
+	}
 
 	// Get directory from $1 argument or use the current directory
 	var dir string

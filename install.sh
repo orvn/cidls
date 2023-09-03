@@ -45,4 +45,4 @@ curl -L $BINARY_URL -o /tmp/$APP
 chmod +x /tmp/$APP
 sudo mv /tmp/$APP /usr/local/bin/$APP
 
-echo "All set! Installed at /usr/local/bin/$APP"
+echo -e "\n 🎉 All set! Installed at /usr/local/bin/$APP \n"

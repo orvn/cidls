@@ -22,4 +22,4 @@ GOOS=darwin GOARCH=arm64 go build -ldflags "$LDFLAGS" -o build/${APP}_darwin_arm
 GOOS=linux GOARCH=amd64 go build -ldflags "$LDFLAGS" -o build/${APP}_linux_amd64
 GOOS=linux GOARCH=arm64 go build -ldflags "$LDFLAGS" -o build/${APP}_linux_arm64
 
-echo "Build complete"
+echo -e "\n 🎉 Build complete \n"
