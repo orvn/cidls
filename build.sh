@@ -1,4 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Build script to compile to multiple platforms and architectures
+
+set -o errexit
+set -o nounset
+set -o pipefail
 
 # Base name of the project
 APP="cidls"

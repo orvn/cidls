@@ -1,4 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Installer for cidls CLI
+
+set -o errexit
+set -o nounset
+set -o pipefail
 
 # Check if the script is running as root, if not then prompt the user to run with sudo
 if [ "$EUID" -ne 0 ]; then
