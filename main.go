@@ -181,7 +181,17 @@ func main() {
 			formattedName := fmt.Sprintf("%-*s", maxNameLen, file.Name())
 
 			if file.Name()[0] == '.' {
-				results <- fmt.Sprintf("%s%s%s\t", colors.DotFileColor, formattedName, resetColor)
+				// Handle dotdirectories and dotfiles
+				if file.IsDir() {
+					results <- fmt.Sprintf("%s%s%s\t", colors.DirColor, formattedName, resetColor)
+					return
+				}
+				cidStr, err := computeCID(dir + string(os.PathSeparator) + file.Name())
+				if err != nil {
+					results <- fmt.Sprintf("%s%s%s\tERROR: %s", colors.DotFileColor, formattedName, resetColor, err)
+				} else {
+					results <- fmt.Sprintf("%s%s%s\t%s%s%s", colors.DotFileColor, formattedName, resetColor, colors.CIDColor, cidStr, resetColor)
+				}
 				return
 			}
 
