@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/user"
 	"sort"
 	"sync"
 
@@ -75,6 +76,18 @@ func split(s, sep string) []string {
 	return parts
 }
 
+// Expand tilde to the full home directory path
+func expandTilde(path string) (string, error) {
+	if path[:1] == "~" {
+		usr, err := user.Current()
+		if err != nil {
+			return "", err
+		}
+		return usr.HomeDir + path[1:], nil
+	}
+	return path, nil
+}
+
 func main() {
 	// Print version and build number
 	// fmt.Printf("Version: %s, Build: %s\n", Version, Build)
@@ -110,6 +123,13 @@ func main() {
 			fmt.Println("Error getting current directory:", err)
 			return
 		}
+	}
+
+	// Expand the tilde ~ to the full home directory path
+	dir, err := expandTilde(dir)
+	if err != nil {
+		fmt.Println("Error expanding tilde:", err)
+		return
 	}
 
 	// Check if directory exists and if it's readable
