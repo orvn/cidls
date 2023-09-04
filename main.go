@@ -222,13 +222,13 @@ func main() {
 			} else if (file.Type() & os.ModePerm) == 0111 {
 				results <- fmt.Sprintf("%s%s%s\t", colors.ExecutableColor, formattedName, resetColor)
 			} else {
-				// This is the new part that handles CIDs and permission issues
+				// Check file readability and output any errors
 				cidStr, err := computeCID(dir + string(os.PathSeparator) + file.Name())
 				if err != nil {
-					if err.Error() == "insufficient permissions" {
-						results <- fmt.Sprintf("%s\t\033[31m%s\033[0m", formattedName, err.Error()) // 31 is the ANSI code for red
+					if err.Error() == "insufficient permissions" || err.Error() == "no such file" {
+						results <- fmt.Sprintf("%s\t\033[31m%s\033[0m", formattedName, err.Error())
 					} else {
-						results <- fmt.Sprintf("%s\tERROR: %s", formattedName, err)
+						results <- fmt.Sprintf(formattedName, err) // For any other errors
 					}
 				} else {
 					results <- fmt.Sprintf("%s\t%s%s%s", formattedName, colors.CIDColor, cidStr, resetColor)
@@ -250,11 +250,22 @@ func main() {
 }
 
 func computeCID(filename string) (string, error) {
-	content, err := os.ReadFile(filename)
+	// Attempt to open the file in read-only mode to check permissions
+	file, err := os.OpenFile(filename, os.O_RDONLY, 0)
 	if err != nil {
 		if os.IsPermission(err) {
 			return "", fmt.Errorf("insufficient permissions")
 		}
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("no such file")
+		}
+		return "", err
+	}
+	file.Close()
+
+	// Now read the file
+	content, err := os.ReadFile(filename)
+	if err != nil {
 		return "", err
 	}
 
