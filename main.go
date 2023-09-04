@@ -228,7 +228,7 @@ func main() {
 					if err.Error() == "insufficient permissions" || err.Error() == "no such file" {
 						results <- fmt.Sprintf("%s\t\033[31m%s\033[0m", formattedName, err.Error())
 					} else {
-						results <- fmt.Sprintf(formattedName, err) // For any other errors
+						results <- fmt.Sprintf(formattedName, err)
 					}
 				} else {
 					results <- fmt.Sprintf("%s\t%s%s%s", formattedName, colors.CIDColor, cidStr, resetColor)
