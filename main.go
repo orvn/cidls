@@ -120,7 +120,19 @@ func main() {
 		var err error
 		dir, err = os.Getwd()
 		if err != nil {
-			fmt.Println("Error getting current directory:", err)
+			fmt.Println("Error: unable to get current directory:", err)
+			return
+		}
+	}
+
+	// Get CID version from $1 argument or use default v1
+	var cidVersion int = 1
+	if len(os.Args) > 2 {
+		versionArg := os.Args[2]
+		if versionArg == "0" {
+			cidVersion = 0
+		} else if versionArg != "1" {
+			fmt.Println("Error: Invalid CID version. Use 0 or 1.")
 			return
 		}
 	}
@@ -206,7 +218,7 @@ func main() {
 					results <- fmt.Sprintf("%s%s%s\t", colors.DirColor, formattedName, resetColor)
 					return
 				}
-				cidStr, err := computeCID(dir + string(os.PathSeparator) + file.Name())
+				cidStr, err := computeCID(dir+string(os.PathSeparator)+file.Name(), cidVersion)
 				if err != nil {
 					results <- fmt.Sprintf("%s%s%s\tERROR: %s", colors.DotFileColor, formattedName, resetColor, err)
 				} else {
@@ -223,7 +235,7 @@ func main() {
 				results <- fmt.Sprintf("%s%s%s\t", colors.ExecutableColor, formattedName, resetColor)
 			} else {
 				// Check file readability and output any errors
-				cidStr, err := computeCID(dir + string(os.PathSeparator) + file.Name())
+				cidStr, err := computeCID(dir+string(os.PathSeparator)+file.Name(), cidVersion)
 				if err != nil {
 					if err.Error() == "insufficient permissions" || err.Error() == "no such file" {
 						results <- fmt.Sprintf("%s\t\033[31m%s\033[0m", formattedName, err.Error())
@@ -249,7 +261,7 @@ func main() {
 	}
 }
 
-func computeCID(filename string) (string, error) {
+func computeCID(filename string, cidVersion int) (string, error) {
 	// Attempt to open the file in read-only mode to check permissions
 	file, err := os.OpenFile(filename, os.O_RDONLY, 0)
 	if err != nil {
@@ -274,6 +286,12 @@ func computeCID(filename string) (string, error) {
 		return "", err
 	}
 
-	c := cid.NewCidV1(cid.Raw, hash)
+	var c cid.Cid
+	if cidVersion == 0 {
+		c = cid.NewCidV0(hash)
+	} else {
+		c = cid.NewCidV1(cid.Raw, hash)
+	}
+
 	return c.String(), nil
 }
